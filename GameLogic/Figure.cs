@@ -7,7 +7,6 @@ namespace UglyTetris.GameLogic
     {
         public Figure()
         {
-            
         }
 
         public Figure(Figure figure)
@@ -58,9 +57,6 @@ namespace UglyTetris.GameLogic
             {null, null, null, null}
         };
 
-        public int Width => Tiles.GetUpperBound(0) + 1;
-        public int Height => Tiles.GetUpperBound(1) + 1;
-        
         public void RotateLeft()
         {
             var newTiles = new Tile[Height, Width]; // rotation swaps coordinates
@@ -89,6 +85,35 @@ namespace UglyTetris.GameLogic
             }
 
             Tiles = newTiles;
+        }
+
+        private int _originX => Tiles.GetLowerBound(0);
+        private int _originY => Tiles.GetLowerBound(1);
+        public int XMax => Tiles.GetUpperBound(0);
+        public int YMax => Tiles.GetUpperBound(1);
+        public int Width => XMax + 1;
+        public int Height => YMax + 1;
+
+        public bool Check(int x, int y)
+        {
+            if (_originX > x)
+            {
+                return false;
+            }
+            if (_originY > y)
+            {
+                return false;
+            }
+            if (_originX + XMax < x)
+            {
+                return false;
+            }
+            if (_originY + YMax < y)
+            {
+                return false;
+            }
+
+            return Tiles[x, y] != null;
         }
     }
 }

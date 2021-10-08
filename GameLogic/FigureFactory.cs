@@ -23,55 +23,48 @@ namespace UglyTetris.GameLogic
                             "  x " + nl +
                             "  x " + nl +
                             "  x ";
-                    color = "Cyan";
+                    color = "LightSkyBlue";
                     break;
 
                 case FigureType.O:
-                    tiles = "    " + nl +
-                            " xx " + nl +
-                            " xx " + nl +
-                            "    ";
-                    color = "Yellow";
+                    tiles = "xx" + nl +
+                            "xx";
+                    color = "Goldenrod";
                     break;
 
                 case FigureType.T:
-                    tiles = "    " + nl +
-                            " xxx" + nl +
-                            "  x " + nl +
-                            "    ";
-                    color = "BlueViolet";
+                    tiles = "   " + nl +
+                            "xxx" + nl +
+                            " x ";
+                    color = "MediumPurple";
                     break;
 
                 case FigureType.S:
-                    tiles = " x  " + nl +
-                            " xx " + nl +
-                            "  x " + nl +
-                            "    ";
-                    color = "Red";
+                    tiles = " x " + nl +
+                            " xx" + nl +
+                            "  x";
+                    color = "Crimson";
                     break;
 
                 case FigureType.Z:
-                    tiles = "  x " + nl +
-                            " xx " + nl +
-                            " x  " + nl +
-                            "    ";
-                    color = "Brown";
+                    tiles = " x " + nl +
+                            "xx " + nl +
+                            "x  ";
+                    color = "Peru";
                     break;
 
                 case FigureType.J:
-                    tiles = "  x " + nl +
-                            "  x " + nl +
-                            " xx " + nl +
-                            "    ";
-                    color = "Blue";
+                    tiles = "  x" + nl +
+                            "  x" + nl +
+                            " xx";
+                    color = "DodgerBlue";
                     break;
 
                 case FigureType.L:
-                    tiles = " x  " + nl +
-                            " x  " + nl +
-                            " xx " + nl +
-                            "    ";
-                    color = "Green";
+                    tiles = "x  " + nl +
+                            "x  " + nl +
+                            "xx ";
+                    color = "LimeGreen";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -84,7 +77,6 @@ namespace UglyTetris.GameLogic
         {
             var r = new Random();
             var randomType = r.Next(0, 7); // code smell
-
             return CreateStandardFigure((FigureType) randomType);
         }
     }
