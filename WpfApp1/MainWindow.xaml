@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="UGLУ TETЯIS" Height="800" Width="600" KeyDown="Window_KeyDown">
     <Grid>
-        <Grid >
+        <Grid Background="Black">
             <Grid.RowDefinitions>
                 <RowDefinition></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
@@ -16,8 +16,8 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Canvas Name="MainCanvas" Margin="40" Width="300">
-            </Canvas>
+            <Canvas Name="MainCanvas" Margin="40" Width="300"/>
+
             <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="10">
                 <Button Click="Button_Click" Focusable="False">Left</Button>
                 <Button Click="Button_Click_1" Focusable="False">Turn ACW</Button>
@@ -28,6 +28,7 @@
             <StackPanel Orientation="Vertical" Grid.Column="1">
                 <TextBlock FontSize="50" FontFamily="Bauhaus 93" Margin="50, 0, 0,0" Foreground="#FF3BB827">Lines:</TextBlock>
                 <TextBlock FontSize="80" Margin="50,0,0,0"  Name="LineCountTextBlock" FontFamily="Bauhaus 93" Foreground="#FFCD1D1D"></TextBlock>
+                <Canvas Name="NextFigureCanvas" Margin="40" Width="150" Height="150"/>
             </StackPanel>
         </Grid>
         

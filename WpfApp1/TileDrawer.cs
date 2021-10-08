@@ -60,10 +60,8 @@ namespace WpfApp1
                 rectangle = NewRectangle(color);
                 _tileRectangleMap.Add(tileXy.Tile, rectangle);
             }
-
             Canvas.SetLeft(rectangle, tileXy.X * FieldHelper.BlockWidth + 1);
             Canvas.SetTop(rectangle, tileXy.Y * FieldHelper.BlockHeight + 1);
-
             return rectangle;
         }
 

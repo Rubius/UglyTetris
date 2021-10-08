@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -7,6 +8,47 @@ using UglyTetris.GameLogic;
 
 namespace WpfApp1
 {
+    class AccurateTimer
+    {
+        private delegate void TimerEventDel(int id, int msg, IntPtr user, int dw1, int dw2);
+        private const int TIME_PERIODIC = 1;
+        private const int EVENT_TYPE = TIME_PERIODIC;// + 0x100;  // TIME_KILL_SYNCHRONOUS causes a hang ?!
+        [DllImport("winmm.dll")]
+        private static extern int timeBeginPeriod(int msec);
+        [DllImport("winmm.dll")]
+        private static extern int timeEndPeriod(int msec);
+        [DllImport("winmm.dll")]
+        private static extern int timeSetEvent(int delay, int resolution, TimerEventDel handler, IntPtr user, int eventType);
+        [DllImport("winmm.dll")]
+        private static extern int timeKillEvent(int id);
+
+        Action mAction;
+        private int mTimerId;
+        private TimerEventDel mHandler;  // NOTE: declare at class scope so garbage collector doesn't release it!!!
+
+        public AccurateTimer(Action action, int delay)
+        {
+            mAction = action;
+            timeBeginPeriod(1);
+            mHandler = new TimerEventDel(TimerCallback);
+            mTimerId = timeSetEvent(delay, 0, mHandler, IntPtr.Zero, EVENT_TYPE);
+        }
+
+        public void Stop()
+        {
+            int err = timeKillEvent(mTimerId);
+            timeEndPeriod(1);
+            System.Threading.Thread.Sleep(100);// Ensure callbacks are drained
+        }
+
+        private void TimerCallback(int id, int msg, IntPtr user, int dw1, int dw2)
+        {
+            if (mTimerId != 0)
+                mAction();
+        }
+    }
+
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -18,24 +60,44 @@ namespace WpfApp1
             
             _figureDrawer = new FigureDrawer(new TileDrawer(MainCanvas));
             _fieldDrawer = new FieldDrawer(new TileDrawer(MainCanvas));
+            _nextFigureDrawer = new FigureDrawer(new TileDrawer(NextFigureCanvas));
 
             Game = new Game(new RandomNextFigureFactory());
             Game.FigureStateChanged += GameOnFigureStateChanged;
+            Game.NewFigure += GameOnNewFigure; ;
             Game.LinesChanged += GameOnLinesChanged;
             Game.StateChanged += GameOnStateChanged;
             
             Game.Field = Field.CreateField(FieldHelper.FieldDefaultWidth, FieldHelper.FieldDefaultHeight, "DimGray");
-            Game.ResetFigure(_figureFactory.CreateRandomFigure());
+            Game.ResetFigure();
 
-            _figureDrawer.DrawFigure(Game.Figure, Game.FigurePositionX, Game.FigurePositionY);
             _fieldDrawer.AttachToField(Game.Field);
 
+            _timer = new AccurateTimer(new Action(GameTick), 10);
+        }
 
-            _timer = new System.Windows.Threading.DispatcherTimer {Interval = TimeSpan.FromMilliseconds(10)};
+        private void GameOnNewFigure(object sender, NewFigureEventArgs e)
+        {
+            if (e.Figure == null)
+            {
+                return;
+            }
 
-            _timer.Tick += (sender, args) => { Game.Tick(); };
+            _nextFigureDrawer.DrawFigure(e.Figure, 0, 0);
+        }
 
-            _timer.Start();
+        private void GameTick()
+        {
+            if (App.Current == null)
+            {
+                _timer.Stop();
+                return;
+            }
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Game.Tick();
+            });
         }
 
         private void GameOnStateChanged(object sender, EventArgs e)
@@ -43,7 +105,6 @@ namespace WpfApp1
             if (Game.State == GameState.GameOver)
             {
                 _timer.Stop();
-                MessageBox.Show("GAME OVER");
             }
         }
 
@@ -59,13 +120,11 @@ namespace WpfApp1
 
 
         public Game Game;
-        private readonly System.Windows.Threading.DispatcherTimer _timer;
+        private readonly AccurateTimer _timer;
 
         private FieldDrawer _fieldDrawer;
         private FigureDrawer _figureDrawer;
-
-        
-        
+        private FigureDrawer _nextFigureDrawer;
 
         private void MoveLeft()
         {
@@ -101,10 +160,10 @@ namespace WpfApp1
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.IsRepeat)
-            {
-                return;
-            }
+            //if (e.IsRepeat)
+            //{
+            //    return;
+            //}
 
             if (e.Key == Key.Left)
             {
@@ -116,14 +175,9 @@ namespace WpfApp1
             }
             else if (e.Key == Key.Up)
             {
-                RotateAntiClockWise();
-            }
-            else if (e.Key == Key.Down)
-            {
                 RotateClockWise();
             }
-
-            else if (e.Key == Key.Space)
+            else if (e.Key == Key.Down || e.Key == Key.Space)
             {
                 Drop();
             }
@@ -150,10 +204,18 @@ namespace WpfApp1
 
     internal class RandomNextFigureFactory : INextFigureFactory
     {
+        public RandomNextFigureFactory()
+        {
+            Top = _figureFactory.CreateRandomFigure();
+        }
         public Figure GetNextFigure()
         {
-            return _figureFactory.CreateRandomFigure();
+            var top = Top;
+            Top = _figureFactory.CreateRandomFigure();
+            return top;
         }
+
+        public Figure Top { get; private set; }
 
         readonly FigureFactory _figureFactory = new FigureFactory();
     }
