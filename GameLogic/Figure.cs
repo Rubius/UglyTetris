@@ -21,6 +21,7 @@ namespace UglyTetris.GameLogic
             }
         }
 
+        public readonly string Color;
         public Figure(string tileMap, string color)
         {
             var lines = tileMap.Split(Environment.NewLine);
@@ -28,6 +29,7 @@ namespace UglyTetris.GameLogic
             var width = lines.Max(l => l.Length);
             var height = lines.Length;
 
+            Color = color;
             Tiles = new Tile[width, height];
 
             for (var y = 0; y < height; y++)

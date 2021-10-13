@@ -16,15 +16,16 @@ namespace UglyTetris.GameLogic
             Field = field;
         }
 
-        public HashSet<int> CalculateLinesToDelete(PositionedFigure figure)
+        public HashSet<int> CalculateLinesToDelete(IFigure figure)
         {
             var linesToDelete = new HashSet<int>();
-            for (int y = figure.Y; y < figure.Y + figure.Height - 1; y++)
+            for (int y = figure.Y; y <= figure.YMax; y++)
             {
+                if (y >= Field.Ymax) break;
                 bool deleteLine = true;
-                for (int x = 0; x < Field.Xmax; x++)
+                for (int x = WallThickness; x <= Field.Xmax - WallThickness; x++)
                 {
-                    if (Field.GetTile(x, y) == null && !figure.Check(x - figure.X, y - figure.Y))
+                    if (Field.GetTile(x, y) == null && !figure.Check(x, y))
                     {
                         deleteLine = false;
                         break;
@@ -40,7 +41,7 @@ namespace UglyTetris.GameLogic
             return linesToDelete;
         }
 
-        private int[] CalculateColumnHeights(PositionedFigure figure = null, HashSet<int> linesToDelete = null)
+        private int[] CalculateColumnHeights(IFigure figure = null, HashSet<int> linesToDelete = null)
         {
             var columnHeights = new int[Field.Xmax];
             for (int x = WallThickness; x <= Field.Xmax - WallThickness; x++)
@@ -69,13 +70,20 @@ namespace UglyTetris.GameLogic
             return columnHeights;
         }
 
-        public int CalculateHeight(PositionedFigure figure = null, HashSet<int> linesToDelete = null)
+        public int CalculateHeight(IFigure figure = null, HashSet<int> linesToDelete = null)
         {
             return CalculateColumnHeights(figure, linesToDelete).Max();
         }
 
-        public int CalculateVoids(PositionedFigure figure = null, HashSet<int> linesToDelete = null)
+        private int? _memorizedVoidsCount = null;
+        public int CalculateVoids(IFigure figure = null, HashSet<int> linesToDelete = null)
         {
+            bool isEmptyField = figure == null && linesToDelete == null;
+            if (isEmptyField && _memorizedVoidsCount.HasValue)
+            {
+                return _memorizedVoidsCount.Value;
+            }
+
             int result = 0;
             var columnHeights = CalculateColumnHeights(figure, linesToDelete);
             for (int x = WallThickness; x <= Field.Xmax - WallThickness; x++)
@@ -96,10 +104,20 @@ namespace UglyTetris.GameLogic
                 }
             }
 
+            if (isEmptyField)
+            {
+                _memorizedVoidsCount = result;
+            }
+
             return result;
         }
 
-        public int CalculatePillars(PositionedFigure figure = null, HashSet<int> linesToDelete = null)
+        public int CalculateNewVoids(IFigure figure = null, HashSet<int> linesToDelete = null)
+        {
+            return CalculateVoids(figure, linesToDelete) - CalculateVoids();
+        }
+
+        public int CalculatePillars(IFigure figure = null, HashSet<int> linesToDelete = null)
         {
             var columnHeights = CalculateColumnHeights(figure, linesToDelete);
             int pillarsCount = 0;

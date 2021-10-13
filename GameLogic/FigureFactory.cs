@@ -73,10 +73,11 @@ namespace UglyTetris.GameLogic
             return new Figure(tiles, color);
         }
 
+        private Random _random = new Random();
+
         public Figure CreateRandomFigure()
         {
-            var r = new Random();
-            var randomType = r.Next(0, 7); // code smell
+            var randomType = _random.Next(0, 7); // code smell
             return CreateStandardFigure((FigureType) randomType);
         }
     }

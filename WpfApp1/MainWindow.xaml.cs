@@ -175,7 +175,7 @@ namespace WpfApp1
             }
             else if (e.Key == Key.Up)
             {
-                RotateClockWise();
+                RotateAntiClockWise();
             }
             else if (e.Key == Key.Down || e.Key == Key.Space)
             {
