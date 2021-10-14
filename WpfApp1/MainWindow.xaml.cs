@@ -73,7 +73,7 @@ namespace WpfApp1
 
             _fieldDrawer.AttachToField(Game.Field);
 
-            _timer = new AccurateTimer(new Action(GameTick), 10);
+            _timer = new AccurateTimer(new Action(GameTick), 40);
         }
 
         private void GameOnNewFigure(object sender, NewFigureEventArgs e)
@@ -175,7 +175,7 @@ namespace WpfApp1
             }
             else if (e.Key == Key.Up)
             {
-                RotateAntiClockWise();
+                RotateClockWise();
             }
             else if (e.Key == Key.Down || e.Key == Key.Space)
             {
